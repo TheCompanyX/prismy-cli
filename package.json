@@ -1,18 +1,43 @@
 {
   "name": "prismy-cli",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "CLI tool to generate translations for new i18n keys in your git branch",
+  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts,.js",
+    "format": "prettier --write src/**/*.ts",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "i18n",
+    "translations",
+    "cli",
+    "git",
+    "internationalization"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "commander": "^11.1.0",
+    "conf": "^14.0.0",
+    "inquirer": "^12.7.0",
+    "node-fetch": "^3.3.2",
     "simple-git": "^3.28.0"
   },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0"
+  },
   "bin": {
-    "prismy": "./index.js"
+    "prismy": "./dist/index.js"
   }
 }

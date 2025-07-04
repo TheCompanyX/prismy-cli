@@ -1,0 +1,61 @@
+import fetch from "node-fetch";
+import { RepositoryConfig, TranslationBundle, TranslationApiResponse } from "../types/index.js";
+import { Logger } from "../utils/logger.js";
+
+export class ApiService {
+  private readonly baseUrl = "http://localhost:5173/api";
+
+  constructor(private apiKey: string) {}
+
+  async getRepositoryConfig(repoName: string): Promise<RepositoryConfig> {
+    try {
+      const response = await fetch(`${this.baseUrl}/config?repo=${repoName}`, {
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
+
+      const config = (await response.json()) as RepositoryConfig;
+      Logger.debug("Repository config received", config);
+
+      return config;
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch repository config: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  async generateTranslations(files: TranslationBundle[]): Promise<TranslationApiResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/cli/generate-translations`, {
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({ files }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Translation API request failed: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const result = (await response.json()) as TranslationApiResponse;
+      Logger.debug("Translation response received", result);
+
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Failed to generate translations: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+}
