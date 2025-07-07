@@ -64,7 +64,22 @@ export function createGenerateCommand(): Command {
 
         // Generate translations
         Logger.info("Generating translations...");
-        const translationResponse = await apiService.generateTranslations(bundlesWithContent);
+        const translationResponse = await apiService.generateTranslations(
+          repoName,
+          bundlesWithContent
+        );
+
+        if (translationResponse.updatedFiles.length > 0) {
+          Logger.message("\n");
+        }
+        translationResponse.updatedFiles.map((file) => {
+          Logger.info(`Updated file: ${file.toPath}`);
+          Logger.info(`Added keys:`);
+          file.keys.forEach((key) => {
+            Logger.info(`- ${key}`);
+          });
+          Logger.message("\n");
+        });
 
         // Save translated files
         FileService.saveTranslationFiles(translationResponse.files);

@@ -3,6 +3,10 @@ export class Logger {
     console.log(`ℹ️  ${message}`);
   }
 
+  static message(message: string): void {
+    console.log(`${message}`);
+  }
+
   static success(message: string): void {
     console.log(`✅ ${message}`);
   }

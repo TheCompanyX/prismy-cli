@@ -35,21 +35,13 @@ export class FileService {
   }
 
   static saveTranslationFiles(bundles: TranslationBundle[]): void {
-    const updatedFiles: string[] = [];
-
     bundles.forEach((bundle) => {
       bundle.forEach((file) => {
-        if (file.content) {
-          this.writeFileContent(file.path, file.content);
-          updatedFiles.push(file.path);
+        if (file.newContent) {
+          this.writeFileContent(file.path, file.newContent);
         }
       });
     });
-
-    if (updatedFiles.length > 0) {
-      Logger.success(`Updated ${updatedFiles.length} translation files`);
-      Logger.debug("Updated files", updatedFiles);
-    }
   }
 
   static filterBundlesByChangedFiles(

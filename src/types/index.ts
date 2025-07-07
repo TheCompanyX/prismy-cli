@@ -1,6 +1,12 @@
 export interface TranslationFile {
   path: string;
   content?: string;
+  newContent?: string;
+}
+
+export interface UpdatedFile {
+  toPath: string;
+  keys: string[];
 }
 
 export interface TranslationBundle extends Array<TranslationFile> {}
@@ -18,4 +24,5 @@ export interface ApiResponse<T> {
 
 export interface TranslationApiResponse {
   files: TranslationBundle[];
+  updatedFiles: UpdatedFile[];
 }
