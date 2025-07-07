@@ -54,8 +54,14 @@ prismy generate
 # Use a custom base branch for comparison
 prismy generate --base-branch feature/my-feature
 
-# Short form
-prismy generate -b main
+# Specify repository name manually (useful when git remote detection fails)
+prismy generate --repo-name my-project
+
+# Combine options
+prismy generate --base-branch main --repo-name my-project
+
+# Short forms
+prismy generate -b main -r my-project
 ```
 
 ### Default Behavior
@@ -126,6 +132,23 @@ The CLI provides clear error messages for common issues:
 - **No repository config**: Ensures your repository is properly configured
 - **API errors**: Clear messages about API connectivity issues
 - **File errors**: Warnings about missing or inaccessible files
+
+### Repository Detection Issues
+
+If the CLI cannot automatically detect your repository name from the git remote, you have two options:
+
+1. **Interactive prompt**: The CLI will ask you to enter the repository name manually
+2. **Command line option**: Use `--repo-name` to specify it directly
+
+```bash
+# When auto-detection fails, specify manually
+prismy generate --repo-name my-project-name
+```
+
+This is particularly useful in environments where:
+- Git remotes are not configured
+- Repository URLs don't follow standard patterns
+- You're working with local-only repositories
 
 ## Development
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 import { Command } from "commander";
 import { createAuthCommand, createGenerateCommand } from "./commands/index.js";
 import { Logger } from "./utils/logger.js";

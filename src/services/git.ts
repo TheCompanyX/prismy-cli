@@ -1,4 +1,5 @@
 import { simpleGit, SimpleGit } from "simple-git";
+import { input } from "@inquirer/prompts";
 import { Logger } from "../utils/logger.js";
 
 export class GitService {
@@ -19,21 +20,42 @@ export class GitService {
     }
   }
 
-  async getRepositoryName(): Promise<string> {
+  async getRepositoryName(overrideName?: string): Promise<string> {
+    if (overrideName) {
+      return overrideName;
+    }
     try {
       const remotes = await this.git.getRemotes(true);
       const originUrl = remotes.find((remote) => remote.name === "origin")?.refs?.fetch || "";
       const repoName = originUrl.split("/").pop()?.replace(".git", "") || "";
 
       if (!repoName) {
-        throw new Error("Could not determine repository name from remote URL");
+        Logger.warning("Could not determine repository name from remote URL");
+        const manualRepoName = await input({
+          message: "Please enter the repository name:",
+          validate: (input) => {
+            if (!input || input.trim().length === 0) {
+              return "Repository name cannot be empty";
+            }
+            return true;
+          }
+        });
+        return manualRepoName.trim();
       }
 
       return repoName;
     } catch (error) {
-      throw new Error(
-        `Failed to get repository name: ${error instanceof Error ? error.message : String(error)}`
-      );
+      Logger.warning(`Failed to get repository name: ${error instanceof Error ? error.message : String(error)}`);
+      const manualRepoName = await input({
+        message: "Please enter the repository name:",
+        validate: (input) => {
+          if (!input || input.trim().length === 0) {
+            return "Repository name cannot be empty";
+          }
+          return true;
+        }
+      });
+      return manualRepoName.trim();
     }
   }
 

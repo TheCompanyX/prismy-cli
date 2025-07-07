@@ -14,7 +14,11 @@ export function createGenerateCommand(): Command {
       "-b, --base-branch <branch>",
       "Base branch for comparison (defaults to repository main branch)"
     )
-    .action(async (options: { baseBranch?: string }) => {
+    .option(
+      "-r, --repo-name <name>",
+      "Repository name (overrides auto-detection from git remote)"
+    )
+    .action(async (options: { baseBranch?: string; repoName?: string }) => {
       try {
         Logger.info("Starting translation generation...");
 
@@ -23,7 +27,7 @@ export function createGenerateCommand(): Command {
         const apiService = new ApiService(apiKey);
 
         // Get repository information
-        const repoName = await gitService.getRepositoryName();
+        const repoName = await gitService.getRepositoryName(options.repoName);
         const currentBranch = await gitService.getCurrentBranch();
 
         Logger.info(`Repository: ${repoName}`);

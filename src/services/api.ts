@@ -4,7 +4,7 @@ import { RepositoryConfig, TranslationBundle, TranslationApiResponse } from "../
 import { Logger } from "../utils/logger.js";
 
 export class ApiService {
-  private readonly baseUrl = "http://app.prismy.io/api";
+  private readonly baseUrl = "https://app.prismy.io/api";
 
   constructor(private apiKey: string) {}
 
