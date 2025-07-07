@@ -31,7 +31,10 @@ export class ApiService {
     }
   }
 
-  async generateTranslations(files: TranslationBundle[]): Promise<TranslationApiResponse> {
+  async generateTranslations(
+    repositoryName: string,
+    files: TranslationBundle[]
+  ): Promise<TranslationApiResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/cli/generate-translations`, {
         headers: {
@@ -39,13 +42,18 @@ export class ApiService {
           "Content-Type": "application/json",
         },
         method: "POST",
-        body: JSON.stringify({ files }),
+        body: JSON.stringify({ repositoryName, files }),
       });
 
       if (!response.ok) {
-        throw new Error(
-          `Translation API request failed: ${response.status} ${response.statusText}`
-        );
+        let errorMessage = response.statusText;
+        try {
+          const errorBody = (await response.json()) as { message?: string };
+          errorMessage = errorBody.message || errorMessage;
+        } catch {
+          // If parsing fails, will use statusText as fallback (assigned above)
+        }
+        throw new Error(`Translation API request failed: ${response.status} ${errorMessage}`);
       }
 
       const result = (await response.json()) as TranslationApiResponse;
