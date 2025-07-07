@@ -7,6 +7,7 @@ export interface TranslationFile {
 export interface UpdatedFile {
   toPath: string;
   keys: string[];
+  translations: string[];
 }
 
 export interface TranslationBundle extends Array<TranslationFile> {}

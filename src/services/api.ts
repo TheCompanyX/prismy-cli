@@ -1,9 +1,10 @@
 import fetch from "node-fetch";
+import fetchWithTaskPolling from "../utils/fetchWithTaskPolling.js";
 import { RepositoryConfig, TranslationBundle, TranslationApiResponse } from "../types/index.js";
 import { Logger } from "../utils/logger.js";
 
 export class ApiService {
-  private readonly baseUrl = "http://localhost:5173/api";
+  private readonly baseUrl = "http://app.prismy.io/api";
 
   constructor(private apiKey: string) {}
 
@@ -36,14 +37,27 @@ export class ApiService {
     files: TranslationBundle[]
   ): Promise<TranslationApiResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/cli/generate-translations`, {
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json",
+      const response = await fetchWithTaskPolling(
+        this.baseUrl,
+        `/cli/generate-translations`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify({ repositoryName, files }),
         },
-        method: "POST",
-        body: JSON.stringify({ repositoryName, files }),
-      });
+        async (partialResponse) => {
+          if (partialResponse.ok) {
+            const partialResult = await partialResponse.json();
+            Logger.message(
+              `🔍 Found ${partialResult.keysToTranslate.length} new keys to translate`
+            );
+            Logger.info("Translating...");
+          }
+        }
+      );
 
       if (!response.ok) {
         let errorMessage = response.statusText;

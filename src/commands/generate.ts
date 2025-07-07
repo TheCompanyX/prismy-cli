@@ -44,8 +44,6 @@ export function createGenerateCommand(): Command {
           return;
         }
 
-        Logger.info(`Found ${changedFiles.size} changed files`);
-
         // Filter translation bundles to only include those with changed files
         const editedFilesNeedingProcessing = FileService.filterBundlesByChangedFiles(
           repositoryConfig.filesToSync,
@@ -57,26 +55,30 @@ export function createGenerateCommand(): Command {
           return;
         }
 
-        Logger.info(`Processing ${editedFilesNeedingProcessing.length} translation bundles`);
+        Logger.info(`Found ${editedFilesNeedingProcessing.length} translations files modified.`);
 
         // Load file contents
         const bundlesWithContent = FileService.loadFileContents(editedFilesNeedingProcessing);
 
         // Generate translations
-        Logger.info("Generating translations...");
+        Logger.info("Looking for new keys to translate...");
         const translationResponse = await apiService.generateTranslations(
           repoName,
           bundlesWithContent
         );
 
+        if (translationResponse.updatedFiles.length === 0) {
+          Logger.info("Done: we found nothing to translate.");
+          return;
+        }
+
         if (translationResponse.updatedFiles.length > 0) {
           Logger.message("\n");
         }
         translationResponse.updatedFiles.map((file) => {
-          Logger.info(`Updated file: ${file.toPath}`);
-          Logger.info(`Added keys:`);
-          file.keys.forEach((key) => {
-            Logger.info(`- ${key}`);
+          Logger.info(`📝 Updated file: ${file.toPath}`);
+          file.keys.forEach((key, index) => {
+            Logger.message(`➕ ${key}: ${file.translations[index]}`);
           });
           Logger.message("\n");
         });
