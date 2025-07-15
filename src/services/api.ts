@@ -2,6 +2,14 @@ import fetch from "node-fetch";
 import fetchWithTaskPolling from "../utils/fetchWithTaskPolling.js";
 import { RepositoryConfig, TranslationBundle, TranslationApiResponse } from "../types/index.js";
 import { Logger } from "../utils/logger.js";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, "../../package.json"), "utf-8"));
+const CLI_VERSION = packageJson.version;
 
 export class ApiService {
   private readonly baseUrl = "https://app.prismy.io/api";
@@ -14,11 +22,23 @@ export class ApiService {
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
           "Content-Type": "application/json",
+          "User-Agent": `prismy-cli/${CLI_VERSION}`,
         },
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+        let errorMessage = response.statusText;
+        try {
+          const responseText = await response.text();
+          const errorBody = JSON.parse(responseText) as {
+            data?: { message?: string };
+            message?: string;
+          };
+          errorMessage = errorBody.data?.message || errorBody.message || errorMessage;
+        } catch (parseError) {
+          // If JSON parsing fails, use statusText as fallback
+        }
+        throw new Error(`API request failed: ${response.status} ${errorMessage}`);
       }
 
       const config = (await response.json()) as RepositoryConfig;
@@ -34,7 +54,8 @@ export class ApiService {
 
   async generateTranslations(
     repositoryName: string,
-    files: TranslationBundle[]
+    files: TranslationBundle[],
+    baseBranch: string
   ): Promise<TranslationApiResponse> {
     try {
       const response = await fetchWithTaskPolling(
@@ -44,9 +65,10 @@ export class ApiService {
           headers: {
             Authorization: `Bearer ${this.apiKey}`,
             "Content-Type": "application/json",
+            "User-Agent": `prismy-cli/${CLI_VERSION}`,
           },
           method: "POST",
-          body: JSON.stringify({ repositoryName, files }),
+          body: JSON.stringify({ repositoryName, files, baseBranch }),
         },
         async (partialResponse) => {
           if (partialResponse.ok) {
@@ -62,10 +84,14 @@ export class ApiService {
       if (!response.ok) {
         let errorMessage = response.statusText;
         try {
-          const errorBody = (await response.json()) as { message?: string };
-          errorMessage = errorBody.message || errorMessage;
-        } catch {
-          // If parsing fails, will use statusText as fallback (assigned above)
+          const responseText = await response.text();
+          const errorBody = JSON.parse(responseText) as {
+            data?: { message?: string };
+            message?: string;
+          };
+          errorMessage = errorBody.data?.message || errorBody.message || errorMessage;
+        } catch (parseError) {
+          // If JSON parsing fails, use statusText as fallback
         }
         throw new Error(`Translation API request failed: ${response.status} ${errorMessage}`);
       }

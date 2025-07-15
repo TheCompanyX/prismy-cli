@@ -5,9 +5,7 @@ export interface TranslationFile {
 }
 
 export interface UpdatedFile {
-  toPath: string;
-  keys: string[];
-  translations: string[];
+  [filePath: string]: Record<string, string>;
 }
 
 export interface TranslationBundle extends Array<TranslationFile> {}

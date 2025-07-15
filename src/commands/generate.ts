@@ -14,10 +14,7 @@ export function createGenerateCommand(): Command {
       "-b, --base-branch <branch>",
       "Base branch for comparison (defaults to repository main branch)"
     )
-    .option(
-      "-r, --repo-name <name>",
-      "Repository name (overrides auto-detection from git remote)"
-    )
+    .option("-r, --repo-name <name>", "Repository name (overrides auto-detection from git remote)")
     .action(async (options: { baseBranch?: string; repoName?: string }) => {
       try {
         Logger.info("Starting translation generation...");
@@ -68,7 +65,8 @@ export function createGenerateCommand(): Command {
         Logger.info("Looking for new keys to translate...");
         const translationResponse = await apiService.generateTranslations(
           repoName,
-          bundlesWithContent
+          bundlesWithContent,
+          baseBranch
         );
 
         if (translationResponse.updatedFiles.length === 0) {
@@ -79,10 +77,12 @@ export function createGenerateCommand(): Command {
         if (translationResponse.updatedFiles.length > 0) {
           Logger.message("\n");
         }
-        translationResponse.updatedFiles.map((file) => {
-          Logger.info(`📝 Updated file: ${file.toPath}`);
-          file.keys.forEach((key, index) => {
-            Logger.message(`➕ ${key}: ${file.translations[index]}`);
+        translationResponse.updatedFiles.map((fileObj) => {
+          const filePath = Object.keys(fileObj)[0];
+          const translations = fileObj[filePath];
+          Logger.info(`📝 Updated file: ${filePath}`);
+          Object.entries(translations).forEach(([key, value]) => {
+            Logger.message(`➕ ${key}: ${value}`);
           });
           Logger.message("\n");
         });
