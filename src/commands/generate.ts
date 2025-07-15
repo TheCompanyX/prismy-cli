@@ -79,11 +79,23 @@ export function createGenerateCommand(): Command {
         }
         translationResponse.updatedFiles.map((fileObj) => {
           const filePath = Object.keys(fileObj)[0];
-          const translations = fileObj[filePath];
+          const fileData = fileObj[filePath];
           Logger.info(`📝 Updated file: ${filePath}`);
-          Object.entries(translations).forEach(([key, value]) => {
-            Logger.message(`➕ ${key}: ${value}`);
-          });
+          
+          // Display added keys
+          if (fileData.addedKeys && Object.keys(fileData.addedKeys).length > 0) {
+            Object.entries(fileData.addedKeys).forEach(([key, value]) => {
+              Logger.message(`➕ ${key}: ${value}`);
+            });
+          }
+          
+          // Display deleted keys
+          if (fileData.deletedKeys && fileData.deletedKeys.length > 0) {
+            fileData.deletedKeys.forEach((key) => {
+              Logger.message(`➖ ${key}`);
+            });
+          }
+          
           Logger.message("\n");
         });
 

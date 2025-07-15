@@ -5,7 +5,10 @@ export interface TranslationFile {
 }
 
 export interface UpdatedFile {
-  [filePath: string]: Record<string, string>;
+  [filePath: string]: {
+    addedKeys: Record<string, string>;
+    deletedKeys: string[];
+  };
 }
 
 export interface TranslationBundle extends Array<TranslationFile> {}
