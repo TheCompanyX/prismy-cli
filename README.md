@@ -9,6 +9,7 @@ A powerful CLI tool that automatically generates translations for new i18n keys 
 - 🔧 **Git Integration**: Seamlessly works with your git workflow
 - ⚡ **Fast Processing**: Only processes files that have actually changed
 - 🔐 **Secure**: API key management with local storage
+- 📤 **Push / Pull**: Upload or download translation files via the Prismy Hosted API (CI-friendly)
 
 ## Installation
 
@@ -63,6 +64,20 @@ prismy generate --base-branch main --repo-name my-project
 # Short forms
 prismy generate -b main -r my-project
 ```
+
+### Push & Pull (Prismy Hosted)
+
+Upload or download translation files using the Prismy Hosted public API. Works in CI with `--api-token` or `PRISMY_API_TOKEN`.
+
+```bash
+# Push a local translation file
+prismy push ./locales/en.json --repo-id <id> --language en-US --bundle-name common
+
+# Pull a translation file (saved as JSON)
+prismy pull ./locales/en.json --repo-id <id> --language en-US --bundle-name common
+```
+
+**Full documentation:** [PRISMY_PUSH.md](PRISMY_PUSH.md) — options, authentication, file formats, and CI usage.
 
 ### Default Behavior
 
