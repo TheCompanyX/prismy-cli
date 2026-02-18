@@ -2,21 +2,30 @@
 
 This guide shows how to run **push** (upload source file and wait for translations) then **pull** (download translated files) in GitHub Actions, GitLab CI, or Bitbucket Pipelines.
 
-**Workflow:**
+## Table of Contents
+
+- [1. General Workflow concept](#1-general-workflow-concept)
+- [2. Secrets / variables](#2-secrets--variables)
+- [3. GitHub Actions](#3-github-actions)
+- [4. GitLab CI](#4-gitlab-ci)
+- [5. Bitbucket Pipelines](#5-bitbucket-pipelines)
+- [6. Using fixed values (no extra variables)](#6-using-fixed-values-no-extra-variables)
+- [7. Optional: run only when i18n files change](#7-optional-run-only-when-i18n-files-change)
+
+## 1. General Workflow concept:
+
 1. Push `src/i18n/en.json` to Prismy and wait for translations to complete.
 2. Pull `src/i18n/en.json`, `src/i18n/es.json`, and `src/i18n/fr.json` back from Prismy.
 
 Adjust paths, `--repo-id`, `--bundle-name`, and languages to match your project.
 
----
-
-## 1. Secrets / variables
+## 2. Secrets / variables
 
 In each platform, define:
 
-| Name | Description | Secret? |
-|------|-------------|--------|
-| `PRISMY_API_TOKEN` | API token from your Prismy organization settings | Yes |
+| Name               | Description                                      | Secret? |
+| ------------------ | ------------------------------------------------ | ------- |
+| `PRISMY_API_TOKEN` | API token from your Prismy organization settings | Yes     |
 
 Optional (can be env vars or hardcoded in the config):
 
@@ -25,7 +34,7 @@ Optional (can be env vars or hardcoded in the config):
 
 ---
 
-## 2. GitHub Actions
+## 3. GitHub Actions
 
 **.github/workflows/prismy-sync.yml**
 
@@ -79,12 +88,11 @@ jobs:
 ```
 
 **Setup:**
+
 - **Settings → Secrets and variables → Actions**: add secret `PRISMY_API_TOKEN`.
 - Optionally add variables `PRISMY_REPO_ID` and `PRISMY_BUNDLE_NAME` (or replace `${{ vars.PRISMY_REPO_ID }}` / `${{ vars.PRISMY_BUNDLE_NAME }}` with your values in the YAML).
 
----
-
-## 3. GitLab CI
+## 4. GitLab CI
 
 **.gitlab-ci.yml** (add or merge into your existing config)
 
@@ -95,16 +103,16 @@ prismy-sync:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"
     - if: $CI_PIPELINE_SOURCE == "web"
   variables:
-    PRISMY_REPO_ID: "YOUR_REPO_ID"      # or use a GitLab CI variable
+    PRISMY_REPO_ID: "YOUR_REPO_ID" # or use a GitLab CI variable
     PRISMY_BUNDLE_NAME: "common"
   before_script:
     - npm install -g prismy-cli
   script:
     - prismy push src/i18n/en.json
-        --repo-id "${PRISMY_REPO_ID}"
-        --language en-US
-        --bundle-name "${PRISMY_BUNDLE_NAME}"
-        --wait-for-translations
+      --repo-id "${PRISMY_REPO_ID}"
+      --language en-US
+      --bundle-name "${PRISMY_BUNDLE_NAME}"
+      --wait-for-translations
     - prismy pull src/i18n/en.json --repo-id "${PRISMY_REPO_ID}" --language en-US --bundle-name "${PRISMY_BUNDLE_NAME}"
     - prismy pull src/i18n/es.json --repo-id "${PRISMY_REPO_ID}" --language es-ES --bundle-name "${PRISMY_BUNDLE_NAME}"
     - prismy pull src/i18n/fr.json --repo-id "${PRISMY_REPO_ID}" --language fr-FR --bundle-name "${PRISMY_BUNDLE_NAME}"
@@ -117,14 +125,13 @@ prismy-sync:
 ```
 
 **Setup:**
+
 - **Settings → CI/CD → Variables**: add `PRISMY_API_TOKEN` as a masked (and protected if needed) variable. The CLI reads it from the environment in CI.
 - Set `PRISMY_REPO_ID` (and optionally `PRISMY_BUNDLE_NAME`) in the job `variables` or as CI/CD variables.
 
 **Note:** Pushing back to the repo from GitLab CI usually requires a deploy token or project access token with write rights; adjust the `git push` URL and credentials to match your setup.
 
----
-
-## 4. Bitbucket Pipelines
+## 5. Bitbucket Pipelines
 
 **bitbucket-pipelines.yml**
 
@@ -157,13 +164,12 @@ pipelines:
 ```
 
 **Setup:**
+
 - **Repository settings → Pipelines → Repository variables**: add `PRISMY_API_TOKEN` (secured). Add `PRISMY_REPO_ID` and `PRISMY_BUNDLE_NAME` (or set them in the step `variables` with literal values).
 
 **Note:** Pushing from Pipelines may require an app password or token; configure it in the step (e.g. via a secured variable) and use it in `git push` if needed.
 
----
-
-## 5. Using fixed values (no extra variables)
+## 6. Using fixed values (no extra variables)
 
 If you prefer not to use repo/bundle variables, hardcode them in the script. Example for GitHub Actions:
 
@@ -191,7 +197,7 @@ Same idea applies to GitLab and Bitbucket: set `PRISMY_REPO_ID` and `PRISMY_BUND
 
 ---
 
-## 6. Optional: run only when i18n files change
+## 7. Optional: run only when i18n files change
 
 **GitHub Actions** – trigger only when source translations change:
 

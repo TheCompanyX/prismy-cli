@@ -1,3 +1,9 @@
+# Prismy Push & Pull (Prismy Hosted)
+
+- [1. Prismy Push](#prismy-push)
+- [2. Prismy Pull](#prismy-pull)
+- [3. CI configuration](#ci-configuration)
+
 ## `prismy push`
 
 Upload a local translation file to Prismy Hosted using the public API.  
