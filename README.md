@@ -2,7 +2,7 @@
 
 The Prismy CLI provides commands for managing translations, tailored to different integration setups with Prismy.
 
-[Prismy](prismy.io) helps teams ship localized softwares, webapps and app faster with tailored AI translations, great developer experience and great tools for reviewers to make wording changes easy.
+[Prismy](https://www.prismy.io) helps teams ship localized softwares, webapps and app faster with tailored AI translations, great developer experience and great tools for reviewers to make wording changes easy.
 
 ## Two Main Use Cases:
 
