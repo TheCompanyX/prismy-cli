@@ -150,3 +150,8 @@ If the file does not exist on Prismy, the API returns an empty object `{}`.
 
 **Note:** The Get file API returns only JSON. For other formats (e.g. YAML, PO, RESX), use the CDN hosted version instead; the URL is available in your Prismy Hosted configuration in Prismy.
 
+---
+
+## CI configuration
+
+For ready-to-use pipelines (push source file, wait for translations, then pull translated files) on **GitHub Actions**, **GitLab CI**, or **Bitbucket Pipelines**, see **[CI_SETUP.md](CI_SETUP.md)**.

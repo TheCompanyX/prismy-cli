@@ -77,7 +77,7 @@ prismy push ./locales/en.json --repo-id <id> --language en-US --bundle-name comm
 prismy pull ./locales/en.json --repo-id <id> --language en-US --bundle-name common
 ```
 
-**Full documentation:** [PRISMY_PUSH.md](PRISMY_PUSH.md) — options, authentication, file formats, and CI usage.
+**Full documentation:** [docs/PRISMY_PUSH.md](docs/PRISMY_PUSH.md) — options, authentication, file formats, and CI usage.
 
 ### Default Behavior
 
