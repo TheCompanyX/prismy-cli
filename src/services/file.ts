@@ -1,5 +1,10 @@
 import fs from "fs";
-import { TranslationBundle } from "../types/index.js";
+import path from "path";
+import {
+  TranslationBundle,
+  UpdateTranslationOriginalFormat,
+  UpdateTranslationRequest,
+} from "../types/index.js";
 import { Logger } from "../utils/logger.js";
 
 export class FileService {
@@ -16,6 +21,8 @@ export class FileService {
 
   static writeFileContent(filePath: string, content: string): void {
     try {
+      const dir = path.dirname(filePath);
+      fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(filePath, content, "utf8");
       Logger.debug(`File written: ${filePath}`);
     } catch (error) {
@@ -49,5 +56,70 @@ export class FileService {
     changedFiles: Set<string>
   ): TranslationBundle[] {
     return bundles.filter((bundle) => bundle.some((file) => changedFiles.has(file.path)));
+  }
+
+  static detectOriginalFormat(filePath: string): UpdateTranslationOriginalFormat | undefined {
+    const ext = path.extname(filePath).toLowerCase();
+    switch (ext) {
+      case ".json":
+        return "json";
+      case ".yaml":
+        return "yaml";
+      case ".yml":
+        return "yml";
+      case ".po":
+        return "po";
+      case ".pot":
+        return "pot";
+      case ".resx":
+        return "resx";
+      case ".xml":
+        return "xml";
+      case ".arb":
+        return "arb";
+      case ".xcstrings":
+        return "xcstrings";
+      case ".ts":
+        return "ts";
+      case ".js":
+        return "js";
+      default:
+        return undefined;
+    }
+  }
+
+  static buildUpdateTranslationRequestFromFile(
+    filePath: string,
+    tags?: string[]
+  ): UpdateTranslationRequest {
+    const content = this.readFileContent(filePath);
+    if (content === null) {
+      throw new Error(`Could not read file: ${filePath}`);
+    }
+
+    const normalizedTags = tags?.map((t) => t.trim()).filter(Boolean);
+    const fileName = path.basename(filePath);
+    const originalFormat = this.detectOriginalFormat(filePath);
+
+    if (originalFormat === "json" || originalFormat === "arb" || originalFormat === "xcstrings") {
+      try {
+        const parsed = JSON.parse(content) as unknown;
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          return {
+            json: parsed as Record<string, unknown>,
+            tags: normalizedTags && normalizedTags.length > 0 ? normalizedTags : undefined,
+          };
+        }
+      } catch {
+        // fall back to raw content upload
+      }
+    }
+
+    return {
+      content,
+      fileName,
+      originalFormat,
+      tags: normalizedTags && normalizedTags.length > 0 ? normalizedTags : undefined,
+    };
   }
 }

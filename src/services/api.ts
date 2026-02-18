@@ -1,6 +1,13 @@
 import fetch from "node-fetch";
 import fetchWithTaskPolling from "../utils/fetchWithTaskPolling.js";
-import { RepositoryConfig, TranslationBundle, TranslationApiResponse } from "../types/index.js";
+import {
+  RepositoryConfig,
+  TranslationBundle,
+  TranslationApiResponse,
+  TranslationObject,
+  UpdateTranslationRequest,
+  UpdateTranslationResponse,
+} from "../types/index.js";
 import { Logger } from "../utils/logger.js";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
@@ -103,6 +110,122 @@ export class ApiService {
     } catch (error) {
       throw new Error(
         `Failed to generate translations: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  async updateTranslationFile(params: {
+    repoId: string;
+    language: string;
+    bundleName: string;
+    override?: boolean;
+    autoTranslate?: boolean;
+    waitForTranslations?: boolean;
+    branch?: string;
+    user?: string;
+    request: UpdateTranslationRequest;
+  }): Promise<UpdateTranslationResponse> {
+    const {
+      repoId,
+      language,
+      bundleName,
+      override,
+      autoTranslate,
+      waitForTranslations,
+      branch,
+      user,
+      request,
+    } = params;
+
+    try {
+      const query = new URLSearchParams();
+      if (typeof override === "boolean") query.set("override", String(override));
+      if (typeof autoTranslate === "boolean") query.set("auto-translate", String(autoTranslate));
+      if (typeof waitForTranslations === "boolean") {
+        query.set("wait-for-translations", String(waitForTranslations));
+      }
+      if (branch) query.set("branch", branch);
+      if (user) query.set("user", user);
+
+      const endpointPath = `/public/prismy-hosted/${encodeURIComponent(repoId)}/${encodeURIComponent(
+        language
+      )}/${encodeURIComponent(bundleName)}`;
+      const url = `${this.baseUrl}${endpointPath}${query.toString() ? `?${query}` : ""}`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+          "User-Agent": `prismy-cli/${CLI_VERSION}`,
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        let errorMessage = response.statusText;
+        try {
+          const responseText = await response.text();
+          const errorBody = JSON.parse(responseText) as { error?: string; message?: string };
+          errorMessage = errorBody.message || errorBody.error || errorMessage;
+        } catch {
+          // ignore parse errors
+        }
+        throw new Error(`Push API request failed: ${response.status} ${errorMessage}`);
+      }
+
+      const result = (await response.json()) as UpdateTranslationResponse;
+      Logger.debug("Push response received", result);
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Failed to update translation file: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  async getTranslationFile(params: {
+    repoId: string;
+    language: string;
+    bundleName: string;
+    branch?: string;
+  }): Promise<TranslationObject> {
+    const { repoId, language, bundleName, branch } = params;
+    try {
+      const query = new URLSearchParams();
+      if (branch) query.set("branch", branch);
+      const endpointPath = `/public/prismy-hosted/${encodeURIComponent(repoId)}/${encodeURIComponent(
+        language
+      )}/${encodeURIComponent(bundleName)}`;
+      const url = `${this.baseUrl}${endpointPath}${query.toString() ? `?${query}` : ""}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+          "User-Agent": `prismy-cli/${CLI_VERSION}`,
+        },
+      });
+
+      if (!response.ok) {
+        let errorMessage = response.statusText;
+        try {
+          const responseText = await response.text();
+          const errorBody = JSON.parse(responseText) as { error?: string; message?: string };
+          errorMessage = errorBody.message || errorBody.error || errorMessage;
+        } catch {
+          // ignore parse errors
+        }
+        throw new Error(`Pull API request failed: ${response.status} ${errorMessage}`);
+      }
+
+      const result = (await response.json()) as TranslationObject;
+      Logger.debug("Pull response received", result);
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Failed to get translation file: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }

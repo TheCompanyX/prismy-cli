@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { createAuthCommand, createGenerateCommand } from "./commands/index.js";
+import { createAuthCommand, createGenerateCommand, createPullCommand, createPushCommand } from "./commands/index.js";
 import { Logger } from "./utils/logger.js";
 
 const program = new Command();
@@ -13,6 +13,8 @@ program
 // Add commands
 program.addCommand(createAuthCommand());
 program.addCommand(createGenerateCommand());
+program.addCommand(createPullCommand());
+program.addCommand(createPushCommand());
 
 // Default command - run generate
 program
