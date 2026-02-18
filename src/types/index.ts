@@ -87,3 +87,6 @@ export interface UpdateTranslationResponse {
   other_translations?: UpdateTranslationResponseOtherTranslations;
   tags?: UpdateTranslationResponseTags;
 }
+
+/** Translation file object from Get Translation File API (key-value pairs). */
+export type TranslationObject = Record<string, string>;

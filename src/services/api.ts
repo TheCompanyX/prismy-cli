@@ -4,6 +4,7 @@ import {
   RepositoryConfig,
   TranslationBundle,
   TranslationApiResponse,
+  TranslationObject,
   UpdateTranslationRequest,
   UpdateTranslationResponse,
 } from "../types/index.js";
@@ -179,6 +180,52 @@ export class ApiService {
     } catch (error) {
       throw new Error(
         `Failed to update translation file: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  async getTranslationFile(params: {
+    repoId: string;
+    language: string;
+    bundleName: string;
+    branch?: string;
+  }): Promise<TranslationObject> {
+    const { repoId, language, bundleName, branch } = params;
+    try {
+      const query = new URLSearchParams();
+      if (branch) query.set("branch", branch);
+      const endpointPath = `/public/prismy-hosted/${encodeURIComponent(repoId)}/${encodeURIComponent(
+        language
+      )}/${encodeURIComponent(bundleName)}`;
+      const url = `${this.baseUrl}${endpointPath}${query.toString() ? `?${query}` : ""}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+          "User-Agent": `prismy-cli/${CLI_VERSION}`,
+        },
+      });
+
+      if (!response.ok) {
+        let errorMessage = response.statusText;
+        try {
+          const responseText = await response.text();
+          const errorBody = JSON.parse(responseText) as { error?: string; message?: string };
+          errorMessage = errorBody.message || errorBody.error || errorMessage;
+        } catch {
+          // ignore parse errors
+        }
+        throw new Error(`Pull API request failed: ${response.status} ${errorMessage}`);
+      }
+
+      const result = (await response.json()) as TranslationObject;
+      Logger.debug("Pull response received", result);
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Failed to get translation file: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }

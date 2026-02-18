@@ -21,6 +21,8 @@ export class FileService {
 
   static writeFileContent(filePath: string, content: string): void {
     try {
+      const dir = path.dirname(filePath);
+      fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(filePath, content, "utf8");
       Logger.debug(`File written: ${filePath}`);
     } catch (error) {
