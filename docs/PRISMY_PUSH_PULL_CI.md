@@ -1,5 +1,14 @@
 # Prismy Push & Pull (Prismy Hosted)
 
+## When to use this guide
+
+This guide covers **`prismy push`** and **`prismy pull`** commands, which are designed for teams using **Prismy Hosted without native GitHub/GitLab integrations** and needing to:
+
+1. sync their translations files with Prismy
+2. generate the translations of the newly introduced wordings.
+
+## Table of Contents
+
 - [1. Prismy Push](#prismy-push)
 - [2. Prismy Pull](#prismy-pull)
 - [3. CI configuration](#ci-configuration)
