@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.6] - 2026-02-19
+
+### Changed
+- Automated release workflow (merge to main → tag and publish to npm).
+
+---
+
 ## [1.3.0] - 2025-02-18
 
 ### Added
