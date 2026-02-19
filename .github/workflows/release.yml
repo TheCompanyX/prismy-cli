@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: 22
 
+      # Trusted Publishers OIDC requires npm 11.5.1+ (runner has npm 10.x by default).
+      - run: npm install -g npm@latest
+
       - run: npm ci
       - run: npm run lint --if-present
       - run: npm test --if-present
