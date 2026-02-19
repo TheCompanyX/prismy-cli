@@ -19,10 +19,13 @@ jobs:
         with:
           node-version: 22
           registry-url: "https://registry.npmjs.org/"
+          # Do not set NPM_TOKEN in repo secrets when using Trusted Publishers (OIDC).
+          # Publish uses id-token; registry-url is only for npm ci.
 
       - run: npm ci
       - run: npm run lint --if-present
       - run: npm test --if-present
       - run: npm run build
 
-      - run: npm publish --access public
+      # Trusted Publisher (OIDC): --provenance is required; no NPM_TOKEN needed.
+      - run: npm publish --access public --provenance
