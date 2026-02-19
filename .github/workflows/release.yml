@@ -13,7 +13,10 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      # Full clone so npm can fetch source commit for provenance verification (avoids npm warning).
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # No registry-url: avoid injecting NODE_AUTH_TOKEN so publish uses OIDC (Trusted Publishers).
       - uses: actions/setup-node@v4
