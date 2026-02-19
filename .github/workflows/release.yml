@@ -15,12 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # No registry-url: avoid injecting NODE_AUTH_TOKEN so publish uses OIDC (Trusted Publishers).
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: "https://registry.npmjs.org/"
-          # Do not set NPM_TOKEN in repo secrets when using Trusted Publishers (OIDC).
-          # Publish uses id-token; registry-url is only for npm ci.
 
       - run: npm ci
       - run: npm run lint --if-present
