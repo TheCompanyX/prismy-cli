@@ -17,6 +17,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
+    "prismy": "node dist/index.js",
     "lint": "eslint src --ext .ts,.js",
     "format": "prettier --write src/**/*.ts",
     "prepublishOnly": "npm run build"

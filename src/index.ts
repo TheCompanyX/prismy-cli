@@ -1,14 +1,18 @@
 #!/usr/bin/env node
+import { createRequire } from "node:module";
 import { Command } from "commander";
 import { createAuthCommand, createGenerateCommand, createPullCommand, createPushCommand } from "./commands/index.js";
 import { Logger } from "./utils/logger.js";
+
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json") as { version: string };
 
 const program = new Command();
 
 program
   .name("prismy")
   .description("CLI tool to generate translations for new i18n keys in your git branch")
-  .version("1.0.0");
+  .version(version);
 
 // Add commands
 program.addCommand(createAuthCommand());
