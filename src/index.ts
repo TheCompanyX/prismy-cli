@@ -1,11 +1,21 @@
 #!/usr/bin/env node
 import { createRequire } from "node:module";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import { createAuthCommand, createGenerateCommand, createPullCommand, createPushCommand } from "./commands/index.js";
 import { Logger } from "./utils/logger.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
-const { version } = require("../package.json") as { version: string };
+const pkgPath = path.resolve(__dirname, "..", "package.json");
+let version = "0.0.0";
+try {
+  const pkg = require(pkgPath) as { version?: string };
+  if (typeof pkg?.version === "string") version = pkg.version;
+} catch {
+  // ignore
+}
 
 const program = new Command();
 
