@@ -90,3 +90,32 @@ export interface UpdateTranslationResponse {
 
 /** Translation file object from Get Translation File API (key-value pairs). */
 export type TranslationObject = Record<string, string>;
+
+/** Glossary term with translations for all languages. */
+export interface GlossaryTerm {
+  description: string | null;
+  terms: Record<string, { value: string }>;
+}
+
+/** Glossary term filtered for a specific language. */
+export interface GlossaryTermForLang {
+  description: string | null;
+  term: string;
+}
+
+/** A single AI instruction entry. */
+export interface AiInstruction {
+  id: number;
+  prompt: string;
+  source: string;
+  repository: string | null;
+  bundle: string | null;
+  bundlePattern: string | null;
+}
+
+/** Response from the AI instructions endpoint. */
+export interface AiInstructionsResponse {
+  language: string;
+  orgDescription: string;
+  instructions: AiInstruction[];
+}

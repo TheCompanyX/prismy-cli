@@ -7,6 +7,9 @@ import {
   TranslationObject,
   UpdateTranslationRequest,
   UpdateTranslationResponse,
+  GlossaryTerm,
+  GlossaryTermForLang,
+  AiInstructionsResponse,
 } from "../types/index.js";
 import { Logger } from "../utils/logger.js";
 import { readFileSync } from "fs";
@@ -226,6 +229,82 @@ export class ApiService {
     } catch (error) {
       throw new Error(
         `Failed to get translation file: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  async getGlossary(): Promise<GlossaryTerm[]>;
+  async getGlossary(lang: string): Promise<GlossaryTermForLang[]>;
+  async getGlossary(lang?: string): Promise<GlossaryTerm[] | GlossaryTermForLang[]> {
+    try {
+      const endpoint = lang
+        ? `/public/glossary/${encodeURIComponent(lang)}`
+        : `/public/glossary`;
+
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+          "User-Agent": `prismy-cli/${CLI_VERSION}`,
+        },
+      });
+
+      if (!response.ok) {
+        let errorMessage = response.statusText;
+        try {
+          const responseText = await response.text();
+          const errorBody = JSON.parse(responseText) as { error?: string; message?: string };
+          errorMessage = errorBody.message || errorBody.error || errorMessage;
+        } catch {
+          // ignore parse errors
+        }
+        throw new Error(`Glossary API request failed: ${response.status} ${errorMessage}`);
+      }
+
+      const result = await response.json();
+      Logger.debug("Glossary response received", result);
+      return result as GlossaryTerm[] | GlossaryTermForLang[];
+    } catch (error) {
+      throw new Error(
+        `Failed to get glossary: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  async getAiInstructions(lang?: string): Promise<AiInstructionsResponse> {
+    try {
+      const endpoint = lang
+        ? `/public/ai-instructions/${encodeURIComponent(lang)}`
+        : `/public/ai-instructions`;
+
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+          "User-Agent": `prismy-cli/${CLI_VERSION}`,
+        },
+      });
+
+      if (!response.ok) {
+        let errorMessage = response.statusText;
+        try {
+          const responseText = await response.text();
+          const errorBody = JSON.parse(responseText) as { error?: string; message?: string };
+          errorMessage = errorBody.message || errorBody.error || errorMessage;
+        } catch {
+          // ignore parse errors
+        }
+        throw new Error(`AI Instructions API request failed: ${response.status} ${errorMessage}`);
+      }
+
+      const result = (await response.json()) as AiInstructionsResponse;
+      Logger.debug("AI Instructions response received", result);
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Failed to get AI instructions: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }

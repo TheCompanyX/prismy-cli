@@ -18,20 +18,6 @@ type PushCommandOptions = {
   apiToken?: string;
 };
 
-async function resolveApiToken(optionsToken?: string): Promise<string> {
-  const cliToken = optionsToken?.trim();
-  if (cliToken) return cliToken;
-
-  const envToken = process.env.PRISMY_API_TOKEN?.trim();
-  if (envToken) return envToken;
-
-  if (process.env.CI) {
-    throw new Error("Missing API token. Provide --api-token or set PRISMY_API_TOKEN.");
-  }
-
-  return await AuthService.getApiKey();
-}
-
 export function createPushCommand(): Command {
   const pushCommand = new Command("push");
 
@@ -58,7 +44,7 @@ export function createPushCommand(): Command {
     .action(async (filePath: string, options: PushCommandOptions) => {
       try {
         const absolutePath = path.resolve(filePath);
-        const apiToken = await resolveApiToken(options.apiToken);
+        const apiToken = await AuthService.resolveApiToken(options.apiToken);
 
         const requestBody = FileService.buildUpdateTranslationRequestFromFile(
           absolutePath,
