@@ -3,7 +3,15 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Command } from "commander";
-import { createAuthCommand, createGenerateCommand, createPullCommand, createPushCommand } from "./commands/index.js";
+import {
+  createAuthCommand,
+  createGenerateCommand,
+  createPullCommand,
+  createPushCommand,
+  createSkillsCommand,
+  createGlossaryCommand,
+  createAiInstructionsCommand,
+} from "./commands/index.js";
 import { Logger } from "./utils/logger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -29,6 +37,9 @@ program.addCommand(createAuthCommand());
 program.addCommand(createGenerateCommand());
 program.addCommand(createPullCommand());
 program.addCommand(createPushCommand());
+program.addCommand(createSkillsCommand());
+program.addCommand(createGlossaryCommand());
+program.addCommand(createAiInstructionsCommand());
 
 // Default command - run generate
 program

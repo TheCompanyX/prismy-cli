@@ -43,4 +43,18 @@ export class AuthService {
     config.delete("apiKey");
     Logger.success("API key has been reset");
   }
+
+  static async resolveApiToken(optionsToken?: string): Promise<string> {
+    const cliToken = optionsToken?.trim();
+    if (cliToken) return cliToken;
+
+    const envToken = process.env.PRISMY_API_TOKEN?.trim();
+    if (envToken) return envToken;
+
+    if (process.env.CI) {
+      throw new Error("Missing API token. Provide --api-token or set PRISMY_API_TOKEN.");
+    }
+
+    return await AuthService.getApiKey();
+  }
 }
