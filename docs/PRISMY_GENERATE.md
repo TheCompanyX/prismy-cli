@@ -88,6 +88,22 @@ prismy generate -r my-project
 
 **Use case**: When git remotes aren't configured or don't follow standard patterns.
 
+### `--key-descriptions <json-or-path>` / `-k <json-or-path>`
+
+Provide context descriptions for translation keys. This helps the AI produce more accurate translations by understanding where and how each key is used. You can pass either a path to a JSON file or inline JSON.
+
+```bash
+# From a file
+prismy generate -k ./key-descriptions.json
+
+# Inline JSON
+prismy generate -k '{"button.submit": "Submit button in the confirmation modal", "homepage.title": "Page title shown in the browser tab"}'
+```
+
+The JSON is a simple `Record<string, string>` — keys are flat translation key paths (same format as your JSON translation files), values are free-text context descriptions.
+
+**Use case**: When translation keys are ambiguous (e.g. `"home"` could mean a house or a homepage) and you want to give the AI enough context to pick the right translation.
+
 ### Combining Options
 
 ```bash
@@ -95,6 +111,9 @@ prismy generate --base-branch develop --repo-name my-project
 
 # Short forms
 prismy generate -b develop -r my-project
+
+# With key descriptions
+prismy generate -b develop -k ./key-descriptions.json
 ```
 
 ## Default Behavior
