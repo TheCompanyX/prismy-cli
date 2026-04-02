@@ -22,7 +22,7 @@ const packageJson = JSON.parse(readFileSync(join(__dirname, "../../package.json"
 const CLI_VERSION = packageJson.version;
 
 export class ApiService {
-  private readonly baseUrl = "https://app.prismy.io/api";
+  private readonly baseUrl = process.env.PRISMY_API_URL || "https://app.prismy.io/api";
 
   constructor(private apiKey: string) {}
 
@@ -65,9 +65,15 @@ export class ApiService {
   async generateTranslations(
     repositoryName: string,
     files: TranslationBundle[],
-    baseBranch: string
+    baseBranch: string,
+    keyDescriptions?: Record<string, string>
   ): Promise<TranslationApiResponse> {
     try {
+      const body: Record<string, unknown> = { repositoryName, files, baseBranch };
+      if (keyDescriptions && Object.keys(keyDescriptions).length > 0) {
+        body.keyDescriptions = keyDescriptions;
+      }
+
       const response = await fetchWithTaskPolling(
         this.baseUrl,
         `/cli/generate-translations`,
@@ -78,7 +84,7 @@ export class ApiService {
             "User-Agent": `prismy-cli/${CLI_VERSION}`,
           },
           method: "POST",
-          body: JSON.stringify({ repositoryName, files, baseBranch }),
+          body: JSON.stringify(body),
         },
         async (partialResponse) => {
           if (partialResponse.ok) {

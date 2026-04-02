@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { readFileSync } from "fs";
 import { AuthService } from "../services/auth.js";
 import { ApiService } from "../services/api.js";
 import { GitService } from "../services/git.js";
@@ -15,7 +16,11 @@ export function createGenerateCommand(): Command {
       "Base branch for comparison (defaults to repository main branch)"
     )
     .option("-r, --repo-name <name>", "Repository name (overrides auto-detection from git remote)")
-    .action(async (options: { baseBranch?: string; repoName?: string }) => {
+    .option(
+      "-k, --key-descriptions <path>",
+      "Path to a JSON file mapping translation keys to context descriptions"
+    )
+    .action(async (options: { baseBranch?: string; repoName?: string; keyDescriptions?: string }) => {
       try {
         Logger.info("Starting translation generation...");
 
@@ -61,12 +66,31 @@ export function createGenerateCommand(): Command {
         // Load file contents
         const bundlesWithContent = FileService.loadFileContents(editedFilesNeedingProcessing);
 
+        // Load optional key descriptions (inline JSON or file path)
+        let keyDescriptions: Record<string, string> | undefined;
+        if (options.keyDescriptions) {
+          const value = options.keyDescriptions.trim();
+          try {
+            if (value.startsWith("{")) {
+              keyDescriptions = JSON.parse(value) as Record<string, string>;
+            } else {
+              keyDescriptions = JSON.parse(readFileSync(value, "utf-8")) as Record<string, string>;
+            }
+            Logger.info(`Loaded ${Object.keys(keyDescriptions).length} key descriptions`);
+          } catch (error) {
+            throw new Error(
+              `Failed to parse key descriptions: ${error instanceof Error ? error.message : String(error)}`
+            );
+          }
+        }
+
         // Generate translations
         Logger.info("Looking for new keys to translate...");
         const translationResponse = await apiService.generateTranslations(
           repoName,
           bundlesWithContent,
-          baseBranch
+          baseBranch,
+          keyDescriptions
         );
 
         if (translationResponse.updatedFiles.length === 0) {
